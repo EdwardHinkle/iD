@@ -137,10 +137,26 @@ iD.modes.Select = function(context, selection, initial) {
             .classed('selected', true);
 
         radialMenu = iD.ui.RadialMenu(operations);
-        var show = d3.event && !initial;
+        var show = d3.event && !d3.event.shiftKey && !initial;
 
         if (show) {
             positionMenu();
+        }
+
+        if (d3.event && d3.event.shiftKey && !initial) {
+            d3.select(window)
+                .on('mousemove.select', function() {
+                    positionMenu();
+                })
+                .on('keyup.select', function() {
+                    if (d3.event.keyCode === d3.keybinding.modifierCodes.shift) {
+                        showMenu();
+
+                        d3.select(window)
+                            .on('mousemove.select', null)
+                            .on('keyup.select', null);
+                    }
+                }, true);
         }
 
         timeout = window.setTimeout(function() {
@@ -176,6 +192,10 @@ iD.modes.Select = function(context, selection, initial) {
             .on('dblclick.select', null)
             .selectAll(".selected")
             .classed('selected', false);
+
+        d3.select(window)
+            .on('mousemove.select', null)
+            .on('keyup.select', null);
     };
 
     return mode;
